@@ -59,8 +59,6 @@ function eventHandler(handler) {
   };
 }
 
-eventHandler(main)({ postId: '693917d40515887cbec6e653', connectorId: '6937a044cd27a62d0522773b' });
-
 module.exports = {
   eventHandler,
   main,
