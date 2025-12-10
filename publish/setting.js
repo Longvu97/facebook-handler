@@ -1,4 +1,4 @@
-const { MONGODB_URI, COLLECTION_NAME, BUCKET_NAME } = process.env;
+const { MONGODB_URI, COLLECTION_NAME, ENV } = process.env;
 
 const SUPPORT_IMAGES = [
   'image/png',
@@ -20,6 +20,8 @@ const BASE_FACEBOOK_URL = 'https://graph.facebook.com';
 const FACEBOOK_API_VERSION = 'v24.0';
 
 const FACEBOOK_URL = `${BASE_FACEBOOK_URL}/${FACEBOOK_API_VERSION}`;
+
+const BUCKET_NAME = `social-doors-post-${ENV}`;
 
 module.exports = {
   MONGODB_URI,

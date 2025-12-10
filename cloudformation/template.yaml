@@ -65,8 +65,8 @@ Resources:
       MemorySize: 512
       Environment:
         Variables:
-          TABLE_NAME: !Sub 'Item-{{resolve:ssm:PROJECT_ID_${Env}}}-${Env}'
-          MONGOOSE_URI: ''
+          MONGOOSE_URI: !Sub '{{resolve:ssm:MONGOOSE_URI_${Env}}}'
+          COLLECTION_NAME: !Sub '{{resolve:ssm:COLLECTION_NAME_${Env}}}'
       Events:
         SQSEvent:
           Type: SQS
