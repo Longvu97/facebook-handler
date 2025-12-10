@@ -33,18 +33,18 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       FifoQueue: true
-      QueueName: !Sub ${Project}-${ServiceName}-upload-${Env}-dead-letter.fifo
+      QueueName: !Sub ${Project}-${ServiceName}-publish-${Env}-dead-letter.fifo
       Tags:
         - Key: project
           Value: !Ref Project
         - Key: env
           Value: !Ref Env
 
-  UploadQueue:
+  PublishQueue:
     Type: AWS::SQS::Queue
     Properties:
       FifoQueue: true
-      QueueName: !Sub ${Project}-${ServiceName}-upload-${Env}.fifo
+      QueueName: !Sub ${Project}-${ServiceName}-publish-${Env}.fifo
       Tags:
         - Key: project
           Value: !Ref Project
@@ -60,8 +60,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
-      FunctionName: !Sub "${Project}-${ServiceName}-upload-${Env}"
-      CodeUri: ../upload
+      FunctionName: !Sub "${Project}-${ServiceName}-publish-${Env}"
+      CodeUri: ../publish
       MemorySize: 512
       Environment:
         Variables:
@@ -73,6 +73,6 @@ Resources:
           Properties:
             BatchSize: 1
             Enabled: true
-            Queue: !GetAtt UploadQueue.Arn
+            Queue: !GetAtt PublishQueue.Arn
             ScalingConfig:
               MaximumConcurrency: 2
