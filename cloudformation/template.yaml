@@ -65,7 +65,7 @@ Resources:
       MemorySize: 512
       Environment:
         Variables:
-          MONGOOSE_URI: !Sub '{{resolve:ssm:MONGOOSE_URI_${Env}}}'
+          MONGOOSE_URI: !Sub '{{resolve:secretsmanager:MONGOOSE_URI_${Env}:SecretString}}'
           COLLECTION_NAME: !Sub '{{resolve:ssm:COLLECTION_NAME_${Env}}}'
       Events:
         SQSEvent:
