@@ -1,0 +1,12 @@
+*/node_modules
+.DS_Store
+.aws-sam
+.aws-sam/*
+*/template.packaged.yaml
+deploy.sh
+packaged-lock.*
+yarn.lock
+**/test.*
+coverage
+cloudformation/*
+!cloudformation/template.yaml

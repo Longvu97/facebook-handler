@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Env:
+    Type: String
+  Project:
+    Type: String
+    Default: social-doors
+  ServiceName:
+    Type: String
+    Default: facebook
+
+Globals:
+  Function:
+    Timeout: 900
+    Tracing: Active
+    Runtime: nodejs18.x
+    Architectures:
+      - arm64
+    Tags:
+      project: !Ref Project
+      env: !Ref Env
+    Environment:
+      Variables:
+        ENV: !Ref Env
+        # TODO Migrate when on aws-sdk v3 where keepalive is the default.
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+        AWS_XRAY_COLLECT_SQL_QUERIES: 1
+
+Resources:
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: true
+      QueueName: !Sub ${Project}-${ServiceName}-upload-${Env}-dead-letter.fifo
+      Tags:
+        - Key: project
+          Value: !Ref Project
+        - Key: env
+          Value: !Ref Env
+
+  UploadQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      FifoQueue: true
+      QueueName: !Sub ${Project}-${ServiceName}-upload-${Env}.fifo
+      Tags:
+        - Key: project
+          Value: !Ref Project
+        - Key: env
+          Value: !Ref Env
+      ContentBasedDeduplication: true
+      VisibilityTimeout: 900
+      RedrivePolicy:
+        deadLetterTargetArn: !Sub ${DeadLetterQueue.Arn}
+        maxReceiveCount: 5
+
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      FunctionName: !Sub "${Project}-${ServiceName}-upload-${Env}"
+      CodeUri: ../upload
+      MemorySize: 512
+      Environment:
+        Variables:
+          TABLE_NAME: !Sub 'Item-{{resolve:ssm:PROJECT_ID_${Env}}}-${Env}'
+          MONGOOSE_URI: ''
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            BatchSize: 1
+            Enabled: true
+            Queue: !GetAtt UploadQueue.Arn
+            ScalingConfig:
+              MaximumConcurrency: 2
