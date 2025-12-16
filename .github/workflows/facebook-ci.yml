@@ -3,7 +3,7 @@ name: Facebook handler Deployment
 on:
   push:
     branches:
-      - master
+      - main
       - release
   workflow_dispatch:
     inputs:
@@ -27,7 +27,7 @@ env:
 jobs:
   deploy-dev:
     name: Deploy (dev)
-    if: github.ref == 'refs/heads/master' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
     runs-on: ubuntu-latest
     environment: dev
     defaults:
