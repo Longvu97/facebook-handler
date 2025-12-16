@@ -5,7 +5,6 @@ const { BUCKET_NAME } = require('../setting');
 const uploadVideo = require('./uploads/video');
 const uploadPost = require('./uploads/post');
 const s3 = require('../clients/s3');
-const dayjs = require('../clients/dayjs');
 
 const UPLOAD_MATCHING = {
   video: uploadVideo,
@@ -44,43 +43,27 @@ async function publish({ collection, post, connector }) {
     ? customDescriptions[connectorId.toString()] || customDescriptions[subtypeConnector]
     : description;
 
-  let scheduleTimeUnix;
-  if (scheduleTime) {
-    console.log({
-      scheduleTime,
-      timezone: dayjs.tz.guess(),
-      scheduleTimeUnix: dayjs(scheduleTime).unix(),
-      scheduleTimeUnixUTC: dayjs(scheduleTime).utc().unix(),
-      time: dayjs.unix(dayjs(scheduleTime).unix()).format('YYYY-MM-DD HH:mm:ss Z'),
-      timeUTC: dayjs.unix(dayjs(scheduleTime).utc().unix()).format('YYYY-MM-DD HH:mm:ss Z'),
-    });
+  const response = await UPLOAD_MATCHING[subtypePost]({
+    urls: assetUrls,
+    description: message,
+    isSchedule,
+    scheduleTime,
+    platformId,
+    accessToken,
+    title,
+  });
 
-    scheduleTimeUnix = dayjs(scheduleTime).unix();
-  }
+  const { id: platformPostId } = response;
 
-  console.log({ scheduleTimeUnix });
-
-  // const response = await UPLOAD_MATCHING[subtypePost]({
-  //   urls: assetUrls,
-  //   description: message,
-  //   isSchedule,
-  //   scheduleTime: scheduleTimeUnix,
-  //   platformId,
-  //   accessToken,
-  //   title,
-  // });
-
-  // const { id: platformPostId } = response;
-
-  // await collection.updateOne(
-  //   { _id: postId },
-  //   {
-  //     $set: {
-  //       [`connectors.${connectorId}.status`]: 'DONE',
-  //       [`connectors.${connectorId}.platformPostId`]: platformPostId,
-  //     },
-  //   },
-  // );
+  await collection.updateOne(
+    { _id: postId },
+    {
+      $set: {
+        [`connectors.${connectorId}.status`]: 'DONE',
+        [`connectors.${connectorId}.platformPostId`]: platformPostId,
+      },
+    },
+  );
 }
 
 module.exports = publish;
