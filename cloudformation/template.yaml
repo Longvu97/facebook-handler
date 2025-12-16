@@ -65,7 +65,7 @@ Resources:
       MemorySize: 512
       Environment:
         Variables:
-          MONGOOSE_URI: !Sub '{{resolve:secretsmanager:MONGOOSE_URI_${Env}:SecretString}}'
+          MONGOOSE_URI: !Sub 'mongodb+srv://walter-le:${{resolve:ssm:MONGO_PWD}}@cluster0.binby39.mongodb.net/social-doors?appName=Cluster0'
           COLLECTION_NAME: !Sub '{{resolve:ssm:COLLECTION_NAME_${Env}}}'
       Events:
         SQSEvent:

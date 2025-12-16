@@ -1,65 +1,65 @@
-const sortBy = require('lodash.sortby');
+const { GetObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
-const { getFileToBase64 } = require('./s3-utils');
-const uploadPhoto = require('./uploads/photo');
-const axiosClient = require('../clients/axios');
+const { BUCKET_NAME } = require('../setting');
+const uploadVideo = require('./uploads/video');
+const uploadPost = require('./uploads/post');
+const s3 = require('../clients/s3');
+const dayjs = require('../clients/dayjs');
 
-const { SUPPORT_IMAGES, FACEBOOK_URL } = require('../setting');
+const UPLOAD_MATCHING = {
+  video: uploadVideo,
+  post: uploadPost,
+};
 
 async function publish({ collection, post, connector }) {
   const {
     _id: postId,
     files,
-    userId,
-    uploadId,
+    title,
     description,
     customDescriptions,
+    subtype: subtypePost,
     isSchedule,
     scheduleTime,
+    userId,
+    uploadId,
   } = post;
-  const { _id: connectorId, platformId, accessToken, subtype } = connector;
-  const filesWithBase64 = await Promise.all(
-    files.map(async (file, index) => {
-      const { name } = file;
-      const filePath = `${userId}/${uploadId}/${name}`;
-      const base64 = await getFileToBase64(filePath);
+  const { _id: connectorId, subtype: subtypeConnector, platformId, accessToken } = connector;
 
-      return { ...file, base64, index };
-    }),
-  );
+  let assetUrls = [];
+  if (files.length) {
+    assetUrls = await Promise.all(
+      files.map(async (file, index) => {
+        const { name, thumbOffset = 0 } = file;
+        const command = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: `${userId}/${uploadId}/${name}` });
+        const url = await getSignedUrl(s3, command, { expiresIn: 300 });
 
-  const photos = filesWithBase64.filter(({ type }) => SUPPORT_IMAGES.includes(type));
-
-  const assets = await Promise.all(
-    photos
-      .map((file) => uploadPhoto(platformId, accessToken, file)),
-  );
-
-  const assetIds = sortBy(assets, ['index']).map(({ id }) => ({ media_fbid: id }));
+        return { assetUrl: url, index, thumbOffset };
+      }),
+    );
+  }
 
   const message = customDescriptions && Object.keys(customDescriptions).length
-    ? customDescriptions[connectorId.toString()] || customDescriptions[subtype]
+    ? customDescriptions[connectorId.toString()] || customDescriptions[subtypeConnector]
     : description;
 
-  const params = {
-    message,
-    published: !isSchedule,
-    scheduled_publish_time: scheduleTime,
-    access_token: accessToken,
-    attached_media: assetIds,
-  };
+  let scheduleTimeUnix;
+  if (scheduleTime) {
+    scheduleTimeUnix = dayjs(scheduleTime).utc().unix();
+  }
 
-  const response = await axiosClient({
-    method: 'post',
-    url: `${FACEBOOK_URL}/${platformId}/feed`,
-    params,
+  const response = await UPLOAD_MATCHING[subtypePost]({
+    urls: assetUrls,
+    description: message,
+    isSchedule,
+    scheduleTime: scheduleTimeUnix,
+    platformId,
+    accessToken,
+    title,
   });
 
-  console.log('facebook publish', 'post response', response.data);
-
-  const { data } = response;
-
-  const platformPostId = data.id;
+  const { id: platformPostId } = response;
 
   await collection.updateOne(
     { _id: postId },

@@ -16,10 +16,10 @@ const SUPPORT_IMAGES = [
 //   'video/flv',
 // ];
 
-const BASE_FACEBOOK_URL = 'https://graph.facebook.com';
+const BASE_URL = 'https://graph.facebook.com';
 const FACEBOOK_API_VERSION = 'v24.0';
 
-const FACEBOOK_URL = `${BASE_FACEBOOK_URL}/${FACEBOOK_API_VERSION}`;
+const FACEBOOK_URL = `${BASE_URL}/${FACEBOOK_API_VERSION}`;
 
 const BUCKET_NAME = `social-doors-post-${ENV}`;
 
