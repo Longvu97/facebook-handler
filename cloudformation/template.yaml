@@ -65,8 +65,8 @@ Resources:
       MemorySize: 512
       Environment:
         Variables:
-          MONGOOSE_URI: !Sub 'mongodb+srv://walter-le:{{resolve:ssm:MONGO_PWD}}@cluster0.binby39.mongodb.net/social-doors?appName=Cluster0'
-          COLLECTION_NAME: !Sub '{{resolve:ssm:COLLECTION_NAME_dev}}'
+          MONGOOSE_URI: !Sub '{{resolve:ssm:MONGOOSE_URI}}'
+          COLLECTION_NAME: !Sub '{{resolve:ssm:COLLECTION_NAME_${Env}}}'
       Events:
         SQSEvent:
           Type: SQS
