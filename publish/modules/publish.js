@@ -46,30 +46,41 @@ async function publish({ collection, post, connector }) {
 
   let scheduleTimeUnix;
   if (scheduleTime) {
+    console.log({
+      scheduleTime,
+      timezone: dayjs.tz.guess(),
+      scheduleTimeUnix: dayjs(scheduleTime).unix(),
+      scheduleTimeUnixUTC: dayjs(scheduleTime).utc().unix(),
+      time: dayjs.unix(dayjs(scheduleTime).unix()).format('YYYY-MM-DD HH:mm:ss Z'),
+      timeUTC: dayjs.unix(dayjs(scheduleTime).utc().unix()).format('YYYY-MM-DD HH:mm:ss Z'),
+    });
+
     scheduleTimeUnix = dayjs(scheduleTime).unix();
   }
 
-  const response = await UPLOAD_MATCHING[subtypePost]({
-    urls: assetUrls,
-    description: message,
-    isSchedule,
-    scheduleTime: scheduleTimeUnix,
-    platformId,
-    accessToken,
-    title,
-  });
+  console.log({ scheduleTimeUnix });
 
-  const { id: platformPostId } = response;
+  // const response = await UPLOAD_MATCHING[subtypePost]({
+  //   urls: assetUrls,
+  //   description: message,
+  //   isSchedule,
+  //   scheduleTime: scheduleTimeUnix,
+  //   platformId,
+  //   accessToken,
+  //   title,
+  // });
 
-  await collection.updateOne(
-    { _id: postId },
-    {
-      $set: {
-        [`connectors.${connectorId}.status`]: 'DONE',
-        [`connectors.${connectorId}.platformPostId`]: platformPostId,
-      },
-    },
-  );
+  // const { id: platformPostId } = response;
+
+  // await collection.updateOne(
+  //   { _id: postId },
+  //   {
+  //     $set: {
+  //       [`connectors.${connectorId}.status`]: 'DONE',
+  //       [`connectors.${connectorId}.platformPostId`]: platformPostId,
+  //     },
+  //   },
+  // );
 }
 
 module.exports = publish;
