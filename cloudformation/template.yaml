@@ -24,9 +24,6 @@ Globals:
     Environment:
       Variables:
         ENV: !Ref Env
-        # TODO Migrate when on aws-sdk v3 where keepalive is the default.
-        AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-        AWS_XRAY_COLLECT_SQL_QUERIES: 1
 
 Resources:
   DeadLetterQueue:
@@ -65,7 +62,7 @@ Resources:
       MemorySize: 512
       Environment:
         Variables:
-          MONGOOSE_URI: !Sub '{{resolve:ssm:MONGOOSE_URI}}'
+          MONGOOSE_URL: !Sub '{{resolve:ssm:MONGOOSE_URL}}'
           COLLECTION_NAME: !Sub '{{resolve:ssm:COLLECTION_NAME_${Env}}}'
       Events:
         SQSEvent:
