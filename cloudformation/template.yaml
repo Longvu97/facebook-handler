@@ -77,7 +77,7 @@ Resources:
       ToRead:
         Properties:
           Destination:
-            - Arn: "arn:aws:s3:::social-doors-post-${Env}"
+            - Arn: !Sub "arn:aws:s3:::social-doors-post-${Env}"
               Type: AWS::S3::Bucket
           Permissions:
             - Read
