@@ -15,7 +15,7 @@ Globals:
   Function:
     Timeout: 900
     Tracing: Active
-    Runtime: nodejs18.x
+    Runtime: nodejs22.x
     Architectures:
       - arm64
     Tags:
@@ -66,7 +66,7 @@ Resources:
       Environment:
         Variables:
           MONGOOSE_URI: !Sub 'mongodb+srv://walter-le:{{resolve:ssm:MONGO_PWD}}@cluster0.binby39.mongodb.net/social-doors?appName=Cluster0'
-          COLLECTION_NAME: !Sub '{{resolve:ssm:COLLECTION_NAME_${Env}}}'
+          COLLECTION_NAME: !Sub '{{resolve:ssm:COLLECTION_NAME_dev}}'
       Events:
         SQSEvent:
           Type: SQS
