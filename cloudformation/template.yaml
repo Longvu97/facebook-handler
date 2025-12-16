@@ -74,11 +74,10 @@ Resources:
             ScalingConfig:
               MaximumConcurrency: 2
     Connectors:
-      ToReadWrite:
+      ToRead:
         Properties:
           Destination:
             - Arn: "arn:aws:s3:::social-doors-post-${Env}"
               Type: AWS::S3::Bucket
           Permissions:
-            - Write
             - Read
