@@ -46,7 +46,7 @@ async function publish({ collection, post, connector }) {
 
   let scheduleTimeUnix;
   if (scheduleTime) {
-    scheduleTimeUnix = dayjs(scheduleTime).utc().unix();
+    scheduleTimeUnix = dayjs(scheduleTime).unix();
   }
 
   const response = await UPLOAD_MATCHING[subtypePost]({
