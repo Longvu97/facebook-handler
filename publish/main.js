@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const getCollection = require('./get-collection');
-const { MONGODB_URI } = require('./setting');
+const { MONGOOSE_URI } = require('./setting');
 const publish = require('./modules/publish');
 
 let connect;
@@ -31,7 +31,7 @@ async function main(event) {
 
 async function connectToMongo() {
   if (!connect) {
-    connect = mongoose.connect(MONGODB_URI);
+    connect = mongoose.connect(MONGOOSE_URI);
     await connect;
   }
 }
