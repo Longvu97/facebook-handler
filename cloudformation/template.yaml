@@ -73,3 +73,8 @@ Resources:
             Queue: !GetAtt PublishQueue.Arn
             ScalingConfig:
               MaximumConcurrency: 2
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource: !Sub arn:aws:s3:::social-doors-post-${Env}
