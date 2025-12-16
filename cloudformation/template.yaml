@@ -73,8 +73,12 @@ Resources:
             Queue: !GetAtt PublishQueue.Arn
             ScalingConfig:
               MaximumConcurrency: 2
-      Policies:
-        - Statement:
-            - Effect: Allow
-              Action: s3:GetObject
-              Resource: !Sub arn:aws:s3:::social-doors-post-${Env}
+    Connectors:
+      ToReadWrite:
+        Properties:
+          Destination:
+            - Arn: "arn:aws:s3:::social-doors-post-${Env}"
+              Type: AWS::S3::Bucket
+          Permissions:
+            - Write
+            - Read
