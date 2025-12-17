@@ -6,34 +6,36 @@ const { FACEBOOK_URL } = require('../../setting');
  *
  * @param {string} platformId
  * @param {string} accessToken
- * @param {object} config
+ * @param {Array} configs
  * @param {string} config.assetUrl
  * @param {number} config.index
  * @returns
  */
-async function upload(platformId, accessToken, config) {
-  console.log('Publish photo', 'config', config);
-  const { assetUrl, index } = config;
+async function upload(platformId, accessToken, configs) {
+  console.log('Publish photos', 'configs', JSON.stringify(configs));
+
+  const requests = configs.map(({ assetUrl }) => ({
+    method: 'post',
+    relative_url: `${platformId}/photos`,
+    body: `url=${encodeURIComponent(assetUrl)}&published=false`,
+  }));
 
   try {
     const response = await axiosClient.post(
-      `${FACEBOOK_URL}/${platformId}/photos`,
+      `${FACEBOOK_URL}/${platformId}`,
       {
-        url: assetUrl,
-        published: false,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        batch: requests,
+        access_token: accessToken,
       },
     );
 
-    console.log('Publish photo', 'photo response', response.data);
+    console.log('Publish photos', 'photos response', response.data);
 
-    return { id: response.data.id, index };
+    return response.data
+      .filter(({ code }) => code === 200)
+      .map(({ body }) => ({ media_fbid: JSON.parse(body).id }));
   } catch (error) {
-    console.error('Facebook photo upload failed', error);
+    console.error('Facebook photos upload failed', error);
     throw error;
   }
 }
