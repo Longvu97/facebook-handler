@@ -9,14 +9,18 @@ let connect;
 async function main(event) {
   console.log('main', 'event', event);
 
-  let { postId, connectorId } = event;
-  postId = new mongoose.Types.ObjectId(postId);
-  connectorId = new mongoose.Types.ObjectId(connectorId);
+  const { postId, connectorId } = event;
 
   const collection = getCollection();
   const post = await collection.findOne({ _id: new mongoose.Types.ObjectId(postId) });
   if (!post) {
     console.log('main', 'post not found');
+    return;
+  }
+
+  const isExistConnPost = Object.keys(post.connectors).find((key) => key === connectorId);
+  if (!isExistConnPost) {
+    console.log('main', 'connector does not exist in post');
     return;
   }
 
@@ -26,7 +30,19 @@ async function main(event) {
     return;
   }
 
-  await publish({ collection, post, connector });
+  try {
+    await publish({ collection, post, connector });
+  } catch (error) {
+    await collection.updateOne(
+      { _id: new mongoose.Types.ObjectId(postId) },
+      {
+        $set: {
+          [`connectors.${connectorId}.status`]: 'failed',
+          [`connectors.${connectorId}.error`]: error?.message ?? String(error),
+        },
+      },
+    );
+  }
 }
 
 async function connectToMongo() {

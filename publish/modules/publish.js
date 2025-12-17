@@ -1,5 +1,6 @@
 const { GetObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const mongoose = require('mongoose');
 
 const { BUCKET_NAME } = require('../setting');
 const uploadVideo = require('./uploads/video');
@@ -56,10 +57,10 @@ async function publish({ collection, post, connector }) {
   const { id: platformPostId } = response;
 
   await collection.updateOne(
-    { _id: postId },
+    { _id: new mongoose.Types.ObjectId(postId) },
     {
       $set: {
-        [`connectors.${connectorId}.status`]: 'DONE',
+        [`connectors.${connectorId}.status`]: 'done',
         [`connectors.${connectorId}.platformPostId`]: platformPostId,
       },
     },
