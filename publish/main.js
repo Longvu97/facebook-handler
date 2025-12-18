@@ -9,7 +9,7 @@ let connect;
 async function main(event) {
   console.log('main', 'event', event);
 
-  const { postId, connectorId } = event;
+  const { postId, connectorId, notAvailablePlatform } = event;
 
   const collection = getCollection();
   const post = await collection.findOne({ _id: new mongoose.Types.ObjectId(postId) });
@@ -31,7 +31,7 @@ async function main(event) {
   }
 
   try {
-    await publish({ collection, post, connector });
+    await publish({ collection, post, connector, notAvailablePlatform });
   } catch (error) {
     await collection.updateOne(
       { _id: new mongoose.Types.ObjectId(postId) },
@@ -55,6 +55,10 @@ async function connectToMongo() {
 function eventHandler(handler) {
   return async (event) => {
     console.log('handler', 'event', event);
+
+    if (event.detail) {
+      event = event.detail;
+    }
 
     const messages = event.Records?.map(({ body }) => JSON.parse(body)) ?? [event];
 

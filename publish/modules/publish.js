@@ -12,7 +12,7 @@ const UPLOAD_MATCHING = {
   post: uploadPost,
 };
 
-async function publish({ collection, post, connector }) {
+async function publish({ collection, post, connector, notAvailablePlatform }) {
   const {
     _id: postId,
     files,
@@ -20,11 +20,10 @@ async function publish({ collection, post, connector }) {
     description,
     customDescriptions,
     subtype: subtypePost,
-    isSchedule,
-    scheduleTime,
     userId,
     uploadId,
   } = post;
+  let { isSchedule, scheduleTime } = post;
   const { _id: connectorId, subtype: subtypeConnector, platformId, accessToken } = connector;
 
   let assetUrls = [];
@@ -43,6 +42,11 @@ async function publish({ collection, post, connector }) {
   const message = customDescriptions && Object.keys(customDescriptions).length
     ? customDescriptions[connectorId.toString()] || customDescriptions[subtypeConnector]
     : description;
+
+  if (notAvailablePlatform) {
+    isSchedule = !isSchedule;
+    scheduleTime = undefined;
+  }
 
   const response = await UPLOAD_MATCHING[subtypePost]({
     urls: assetUrls,

@@ -73,6 +73,13 @@ Resources:
             Queue: !GetAtt PublishQueue.Arn
             ScalingConfig:
               MaximumConcurrency: 2
+        EventBridgeBus:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !Sub social-doors-event-bus-${Env}
+            Pattern:
+              detail-type:
+                - schedulePost.facebook
     Connectors:
       ToRead:
         Properties:
