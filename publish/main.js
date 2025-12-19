@@ -71,13 +71,21 @@ function eventHandler(handler) {
         await handler(message);
       }
     } finally {
-      if (connect) {
-        await mongoose.connection.close();
-        connect = null;
-      }
+      // if (connect) {
+      //   await mongoose.connection.close();
+      //   connect = null;
+      // }
     }
   };
 }
+
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received, closing MongoDB connection');
+  if (connect) {
+    await mongoose.connection.close();
+    connect = null;
+  }
+});
 
 module.exports = {
   eventHandler,
