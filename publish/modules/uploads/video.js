@@ -12,6 +12,7 @@ async function upload(config) {
     platformId,
     accessToken,
     title,
+    link,
   } = config;
   const { assetUrl, thumbOffset = 0 } = urls[0];
   try {
@@ -24,6 +25,7 @@ async function upload(config) {
         published: !isSchedule,
         scheduled_publish_time: scheduleTime,
         thumb_offset: thumbOffset,
+        link,
       },
       {
         headers: {

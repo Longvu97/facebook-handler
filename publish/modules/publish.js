@@ -1,11 +1,14 @@
 const { GetObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const mongoose = require('mongoose');
+const LinkifyIt = require('linkify-it');
+
+const s3 = require('../clients/s3');
 
 const { BUCKET_NAME } = require('../setting');
 const uploadVideo = require('./uploads/video');
 const uploadPost = require('./uploads/post');
-const s3 = require('../clients/s3');
+const uploadComments = require('./uploads/comment');
 
 const UPLOAD_MATCHING = {
   video: uploadVideo,
@@ -48,6 +51,14 @@ async function publish({ collection, post, connector, notAvailablePlatform }) {
     scheduleTime = undefined;
   }
 
+  let link = '';
+  if (message && !files.length) {
+    const linkify = new LinkifyIt();
+    const matches = linkify.match(message);
+
+    link = matches[0].url;
+  }
+
   const response = await UPLOAD_MATCHING[subtypePost]({
     urls: assetUrls,
     description: message,
@@ -56,6 +67,7 @@ async function publish({ collection, post, connector, notAvailablePlatform }) {
     platformId,
     accessToken,
     title,
+    link,
   });
 
   const { id: platformPostId } = response;
@@ -69,6 +81,10 @@ async function publish({ collection, post, connector, notAvailablePlatform }) {
       },
     },
   );
+
+  if (post.comments.length) {
+    await uploadComments(platformId, accessToken, platformPostId, post.comments);
+  }
 }
 
 module.exports = publish;
