@@ -13,6 +13,7 @@ async function upload(config) {
       scheduleTime,
       platformId,
       accessToken,
+      link,
     } = config;
 
     let assetIds = [];
@@ -26,6 +27,7 @@ async function upload(config) {
       scheduled_publish_time: scheduleTime,
       access_token: accessToken,
       attached_media: assetIds,
+      link,
     };
 
     const response = await axiosClient({

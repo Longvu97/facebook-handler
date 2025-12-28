@@ -66,15 +66,8 @@ function eventHandler(handler) {
 
     await connectToMongo();
 
-    try {
-      for (const message of messages) {
-        await handler(message);
-      }
-    } finally {
-      // if (connect) {
-      //   await mongoose.connection.close();
-      //   connect = null;
-      // }
+    for (const message of messages) {
+      await handler(message);
     }
   };
 }
