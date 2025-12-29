@@ -82,7 +82,9 @@ async function publish({ collection, post, connector, notAvailablePlatform }) {
     },
   );
 
-  if (post.comments.length) {
+  if (Array.isArray(post.comments)
+    && post.comments.some((comment) => comment.content && comment.content.trim() !== '')
+  ) {
     await uploadComments(platformId, accessToken, platformPostId, post.comments);
   }
 }
