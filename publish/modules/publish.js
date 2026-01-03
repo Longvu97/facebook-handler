@@ -55,8 +55,9 @@ async function publish({ collection, post, connector, notAvailablePlatform }) {
   if (message && !files.length) {
     const linkify = new LinkifyIt();
     const matches = linkify.match(message);
-
-    link = matches[0].url;
+    if (matches) {
+      link = matches[0].url;
+    }
   }
 
   const response = await UPLOAD_MATCHING[subtypePost]({
